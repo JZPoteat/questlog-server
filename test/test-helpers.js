@@ -50,19 +50,19 @@ function makeUsersArray() {
             id: 1,
             user_name: 'Geralt', 
             full_name: 'Geralt of Rivia', 
-            password: '$2a$12$CLk4zKAgi4D7OaTTB9gGnercmdBgXkviFOgqHdaDegzdrcsJO6qNe'
+            password: 'roach'
         },
         {
             id: 2,
             user_name: 'your.father', 
             full_name: 'Darth Vader', 
-            password: '$2a$12$KiAsyzp7qFj87Nef9eZIBuTHI9XGz3Kek/0BX6TGXXD.MqXAG7qHe'
+            password: 'padme'
         },
         {
             id: 3,
             user_name: 'mehoy_minoy',
             full_name: 'Doodle Bob',
-            password: '$2a$12$Z/4ShMD8959NU2e8PTe9ZOAgzRQm/0T8aUqdv/5paW4IbjjUAOZT.'
+            password: 'password'
         },
     ];
 }

@@ -11,14 +11,16 @@ gamesRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
-        GamesService.getAllGames(req.app.get('db'))
+        const currentUser = req.user.user_name
+        GamesService.getAllGames(req.app.get('db'), currentUser)
             .then(games => {
                 res.json(GamesService.serializeGames(games));
             })
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
-        const { title, est_time, importance, loc, notes, user_id } = req.body;
+        const { title, est_time, importance, loc, notes } = req.body;
+        const user_id = req.user.id;
         const newGame = { title, est_time, importance, loc, notes, user_id };
         for (const [key, value] of Object.entries(newGame)) {
             if (value == null) {
@@ -41,13 +43,22 @@ gamesRouter
     .all(requireAuth)
     .all(CheckIfGameExists)
     .get((req, res, next) => {
-        console.log(req.params);
+        console.log('what is this? ', req.user);
         GamesService.getById(req.app.get('db'), req.params.id)
             .then(game => {
+                if(game.user_id !== req.user.id) {
+                    return res.status(401).json({ error: 'Unauthorized request line 50'})
+                }
                 res.json(GamesService.serializeGame(game));
             });
     })
     .delete((req, res, next) => {
+        GamesService.getById(req.app.get('db'), req.params.id)
+            .then(game => {
+                if(game.user_id !== req.user.id) {
+                    return res.status(401).json({ error: 'Unauthorized request'});
+                }
+            })
         GamesService.deleteGame(
             req.app.get('db'),
             req.params.id
@@ -61,6 +72,12 @@ gamesRouter
         const { title, est_time, importance, loc, notes } = req.body;
         const gameToUpdate = { title, est_time, importance, loc, notes };
 
+        GamesService.getById(req.app.get('db'), req.params.id)
+        .then(game => {
+            if(game.user_id !== req.user.id) {
+                return res.status(401).json({ error: 'Unauthorized request'});
+            }
+        })
         const numberOfValues = Object.values(gameToUpdate).filter(Boolean).length;
         if(numberOfValues === 0) {
             return res.status(400).json({

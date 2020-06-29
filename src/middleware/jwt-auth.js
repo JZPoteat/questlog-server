@@ -1,10 +1,10 @@
-const AuthService = require('../auth/auth-service')
+const AuthService = require('../auth/auth-service');
+const { token } = require('morgan');
 
 
 function requireAuth(req, res, next) {
 
-    const authToken = req.get('Authorization') || ''
-    console.log('Looking for this???', authToken);
+    const authToken = req.get('Authorization') || '';
     let bearerToken;
     if (!authToken.toLowerCase().startsWith('bearer ')) {
         return res.status(401).json({ error: 'Missing bearer token' });
@@ -12,24 +12,28 @@ function requireAuth(req, res, next) {
         bearerToken = authToken.slice(7, authToken.length);
     }
     try {
-        const payload = AuthService.verifyJwt(bearerToken)
-
-     AuthService.getUserWithUserName(
-       req.app.get('db'),
-       payload.sub,
-     )
-       .then(user => {
-            if (!user)
-                return res.status(401).json({ error: 'Unauthorized request' })
-            req.user = user
-            next()
-       })
-       .catch(err => {
-         console.error(err)
-         next(err)
-       })  
+        const payload = AuthService.verifyJwt(bearerToken);
+        console.log('payload in jwt auth:  ', payload);
+        const [tokenUserName, tokenPassword] = AuthService.parseBasicToken(bearerToken);
+        AuthService.getUserWithUserName(
+            req.app.get('db'),
+            payload.sub
+        )
+            .then(user => {
+                if (!user ) {
+                    console.log('line 24');
+                    return res.status(401).json({ error: 'Unauthorized request' });
+                }
+                req.user = user;
+                next();
+            })
+            .catch(err => {
+                console.error(err);
+                next(err);
+            });  
 
     } catch(error) {
+        console.log('line 37');
         res.status(401).json({ error: 'Unauthorized request' });
     }
 }

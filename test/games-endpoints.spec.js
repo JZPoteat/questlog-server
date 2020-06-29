@@ -6,6 +6,8 @@ const supertest = require('supertest');
 const helpers = require('./test-helpers');
 const { post } = require('../src/app');
 
+
+
 describe('Games Endpoints', () => {
     let db;
     before('make knex instance', () => {
@@ -24,6 +26,37 @@ describe('Games Endpoints', () => {
         maliciousGame,
         testUsers 
     } = helpers.makeGamesFixtures();
+    describe('Protected Endpoints', () => {
+        beforeEach('insert games', () => 
+            helpers.seedQLTables(
+                db,
+                testUsers,
+                testGames
+            )
+        )
+
+        describe ('GET /api/games/:id', () => {
+            it('responds with 401 missing bearer token when no bearer token', () => {
+                return supertest(app)
+                    .get('/api/games/234')
+                    .expect(401, { error: 'Missing bearer token'});
+            });
+            it('Responds with 401 when no credentials supplied', () => {
+                const userNoCreds = { user_name: '', password: ''};
+                return supertest(app)
+                    .get('/api/games/123')
+                    .set('Authorization', helpers.makeAuthHeader(userNoCreds))
+                    .expect(401, {error: 'Unauthorized request'});
+            })
+            it('Responds with 401 when invalid user_name', () => {
+                const userInvalidCreds = { user_name: 'karen', password: 'manager'}
+                return supertest(app)
+                    .get('/api/games/1')
+                    .set('Authorization', helpers.makeAuthHeader(userInvalidCreds))
+                    .expect(401, {error: 'Unauthorized request'});
+            })
+        })
+    })
     describe('GET /api/games', () => {
         context('Given no games', () => {
             beforeEach('seed users', () => 
@@ -44,11 +77,12 @@ describe('Games Endpoints', () => {
                     testGames
                 )
             );
-            it('responds with 200 and all games', () => {
+            it('responds with 200 and all games the user has stored in database', () => {
+                const expectedGames = testGames.filter(game => game.user_id === testUsers[0].id);
                 return supertest(app)
                     .get('/api/games')
                     .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-                    .expect(200, testGames);
+                    .expect(200, expectedGames);
             });
         });
     });
@@ -82,6 +116,13 @@ describe('Games Endpoints', () => {
                     .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, expectedGame);
             });
+            it('responds with 401 when attempting to access an unauthorized game', () => {
+                const gameId = testUsers[0].id + 1;
+                return supertest(app)
+                .get(`/api/games/${gameId}`)
+                .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+                .expect(401, {error: 'Unauthorized request'})
+            })
         });
         context('Given an XSS attack game', () => {
             const testUser = testUsers[0];
@@ -95,7 +136,7 @@ describe('Games Endpoints', () => {
             it('Removes XSS attack content', () => {
                 return supertest(app)
                     .get(`/api/games/${maliciousGame.id}`)
-                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUser))
                     .expect(200)
                     .expect(res => {
                         expect(res.body.title).to.eql('Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;');
@@ -163,7 +204,6 @@ describe('Games Endpoints', () => {
             });
             it('responds with 204 and removes the game', () => {
                 const idToRemove = 1;
-                const expectedGames = testGames.filter(game => game.id !== idToRemove)
                 return supertest(app)
                     .delete(`/api/games/${idToRemove}`)
                     .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
@@ -172,12 +212,19 @@ describe('Games Endpoints', () => {
                         return supertest(app)
                             .get('/api/games')
                             .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-                            .expect(expectedGames);
+                            .expect([]);
                     });
             });
+            it('responds with 401 when game.user_id and user.id does not match', () => {
+                const idToRemove = 2;
+                return supertest(app)
+                .delete(`/api/games/${idToRemove}`)
+                .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
+                .expect(401, {error: 'Unauthorized request'})
+            })
         });
     });
-    describe('PATCH /api/games/:id', () => {
+    describe.only('PATCH /api/games/:id', () => {
 
         context('Given no games', () => {
             beforeEach(() => 
@@ -200,7 +247,7 @@ describe('Games Endpoints', () => {
                 );
             });
             it('responds with 204 and updates the game', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 1;
                 const updateGame = {
                     title: 'updated title',
                     est_time: 23452,
@@ -238,7 +285,7 @@ describe('Games Endpoints', () => {
                     });
             });
             it('responds with 204 when updating only a subset of data', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 1;
                 const updateGame = {
                     title: 'updated title'
                 }

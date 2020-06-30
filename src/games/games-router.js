@@ -47,7 +47,7 @@ gamesRouter
         GamesService.getById(req.app.get('db'), req.params.id)
             .then(game => {
                 if(game.user_id !== req.user.id) {
-                    return res.status(401).json({ error: 'Unauthorized request line 50'})
+                    return res.status(401).json({ error: 'Unauthorized request'})
                 }
                 res.json(GamesService.serializeGame(game));
             });
@@ -69,7 +69,7 @@ gamesRouter
             .catch(next)
     })
     .patch(jsonParser, (req, res, next) => {
-        const { title, est_time, importance, loc, notes } = req.body;
+        const { title, est_time, importance = 1, loc, notes } = req.body;
         const gameToUpdate = { title, est_time, importance, loc, notes };
 
         GamesService.getById(req.app.get('db'), req.params.id)

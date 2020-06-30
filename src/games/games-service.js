@@ -2,7 +2,7 @@ const xss = require('xss');
 const GamesService = {
     getAllGames(knex, user) {
         return knex.from('games')
-            .select('*')
+            .select('games.*', 'users.user_name')
             .join('users', 'games.user_id', '=', 'users.id')
             .where('users.user_name', user);
     },

@@ -224,7 +224,7 @@ describe('Games Endpoints', () => {
             })
         });
     });
-    describe.only('PATCH /api/games/:id', () => {
+    describe('PATCH /api/games/:id', () => {
 
         context('Given no games', () => {
             beforeEach(() => 

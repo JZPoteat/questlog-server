@@ -44,6 +44,49 @@ function makeNewGame() {
     return newGame;
 }
 
+function makeNewReview() {
+    const newReview = {
+        title: 'New review',
+        rating: 30,
+        time_played: 40,
+        review: 'Test review',
+        user_id: 1
+    }
+    return newReview;
+}
+
+function makeTestReviews() {
+    return [
+    
+        {
+            id: 1,
+            title: 'Dark Souls', 
+            rating: 10,
+            time_played: 40, 
+            review: 'Too easy... Maybe a better challenge next time.',
+            date_created: '2016-06-22 19:10:25-07', 
+            user_id: 1
+        },
+        {
+            id: 2,
+            title: 'Star Wars: Jedi Fallen Order',
+            rating: 3,
+            time_played: 30,
+            review: 'Unrealistic.  He would never escape the dark side.',
+            date_created: '2016-06-22 19:10:25-07', 
+            user_id: 2
+        },
+        {
+            id: 3,
+            title: 'Call of Duty',
+            rating: 40,
+            time_played: 200,
+            review: 'mehoooyy minoy minoyy mooy',
+            date_created: '2016-06-22 19:10:25-07', 
+            user_id: 3
+        }   
+    ];
+}
 function makeUsersArray() {
     return [
         {   
@@ -79,6 +122,18 @@ function makeMaliciousGame() {
     return maliciousGame;
 }
 
+function makeMaliciousReview() {
+    const maliciousReview = {
+        id: 911,
+        title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+        rating: 20,
+        time_played: 15,
+        review: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+        user_id: 1
+    };
+    return maliciousReview;
+}
+
 function seedUsers(db, users) {
     const preppedUsers = users.map(user => ({
       ...user,
@@ -95,7 +150,7 @@ function seedUsers(db, users) {
 }
 
 
-function seedQLTables(db, users, games) {
+function seedQLGames(db, users, games) {
     return db.transaction(async trx => {
         await seedUsers(trx, users)
         await trx.into('games').insert(games)
@@ -106,13 +161,29 @@ function seedQLTables(db, users, games) {
     });
 }
 
+function seedQLReviews(db, users, reviews) {
+    console.log(reviews);
+    return db.transaction(async trx => {
+        await seedUsers(trx, users)
+        await trx.into('reviews').insert(reviews)
+        await trx.raw(
+            `SELECT setval('reviews_id_seq', ?)`,
+            [reviews[reviews.length - 1].id],
+        )
+    });
+}
+
+
 
 function makeGamesFixtures() {
     const testGames = makeGamesArray();
-    const newGame = makeNewGame();
-    const maliciousGame = makeMaliciousGame();
     const testUsers = makeUsersArray();
-    return { testGames, newGame, maliciousGame, testUsers };
+    const testReviews = makeTestReviews();
+    const newGame = makeNewGame();
+    const newReview = makeNewReview();
+    const maliciousGame = makeMaliciousGame();
+    const maliciousReview = makeMaliciousReview();
+    return { testGames, testUsers, testReviews, newGame, newReview, maliciousGame, maliciousReview };
 }
 
 function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
@@ -132,16 +203,28 @@ function seedMaliciousGame(db, user, game) {
       )
   }
 
+
+  function seedMaliciousReview(db, user, review) {
+    return seedUsers(db, [user])
+      .then(() =>
+        db
+          .into('reviews')
+          .insert([review])
+      )
+  }
+
   function cleanTables(db) {
     return db.transaction(trx =>
       trx.raw(
         `TRUNCATE
             users,
-            games
+            games,
+            reviews
         `
       )
       .then(() =>
         Promise.all([
+          trx.raw(`ALTER SEQUENCE reviews_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE games_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE users_id_seq minvalue 0 START WITH 1`),
         ])
@@ -151,10 +234,12 @@ function seedMaliciousGame(db, user, game) {
 
 module.exports = {
     makeGamesFixtures,
-    seedQLTables,
+    seedQLGames,
+    seedQLReviews,
     seedUsers,
     makeAuthHeader,
     makeUsersArray,
     seedMaliciousGame,
+    seedMaliciousReview,
     cleanTables,
 };

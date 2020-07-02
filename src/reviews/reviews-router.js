@@ -1,65 +1,65 @@
 const path = require('path');
 const express = require('express');
-const GamesService = require('./games-service');
+const ReviewsService = require('./reviews-service');
 const { requireAuth } = require('../middleware/jwt-auth');
-const gamesRouter = express.Router();
+const reviewsRouter = express.Router();
 const jsonParser = express.json();
 
 
 
-gamesRouter
+reviewsRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
         const currentUser = req.user.user_name
-        GamesService.getAllGames(req.app.get('db'), currentUser)
-            .then(games => {
-                res.json(GamesService.serializeGames(games));
+        ReviewsService.getAllReviews(req.app.get('db'), currentUser)
+            .then(reviews => {
+                res.json(ReviewsService.serializeReviews(reviews));
             })
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
-        const { title, est_time, importance, loc, notes } = req.body;
+        const { title, rating, time_played, review } = req.body;
         const user_id = req.user.id;
-        const newGame = { title, est_time, importance, loc, notes, user_id };
-        for (const [key, value] of Object.entries(newGame)) {
+        const newReview = { title, rating, time_played, review, user_id };
+        for (const [key, value] of Object.entries(newReview)) {
             if (value == null) {
                 return res.status(400).json({
                     error: { message: `Missing '${key}' in request body` }
                 });
             }
         }
-        GamesService.insertGame(req.app.get('db'), newGame)
-            .then(game => {
+        ReviewsService.insertReview(req.app.get('db'), newReview)
+            .then(review => {
                 res
                     .status(201)
-                    .location(path.posix.join(req.originalUrl, `/${game.id}`))
-                    .json(game);
+                    .location(path.posix.join(req.originalUrl, `/${review.id}`))
+                    .json(review);
             });
     });
 
-gamesRouter
+reviewsRouter
     .route('/:id')
     .all(requireAuth)
-    .all(CheckIfGameExists)
+    .all(CheckIfReviewExists)
     .get((req, res, next) => {
         console.log('what is this? ', req.user);
-        GamesService.getById(req.app.get('db'), req.params.id)
-            .then(game => {
-                if(game.user_id !== req.user.id) {
+        ReviewsService.getById(req.app.get('db'), req.params.id)
+            .then(review => {
+                if(review.user_id !== req.user.id) {
                     return res.status(401).json({ error: 'Unauthorized request'})
                 }
-                res.json(GamesService.serializeGame(game));
+                res.json(ReviewsService.serializeReview(review));
             });
     })
     .delete((req, res, next) => {
-        GamesService.getById(req.app.get('db'), req.params.id)
-            .then(game => {
-                if(game.user_id !== req.user.id) {
+        ReviewsService.getById(req.app.get('db'), req.params.id)
+            .then(review => {
+                if(review.user_id !== req.user.id) {
                     return res.status(401).json({ error: 'Unauthorized request'});
                 }
             })
-        GamesService.deleteGame(
+        ReviewsService.deleteReview(
             req.app.get('db'),
             req.params.id
         )
@@ -69,27 +69,27 @@ gamesRouter
             .catch(next)
     })
     .patch(jsonParser, (req, res, next) => {
-        const { title, est_time, importance, loc, notes } = req.body;
-        const gameToUpdate = { title, est_time, importance, loc, notes };
+        const { title, rating, time_played, review } = req.body;
+        const reviewToUpdate = { title, rating, time_played, review };
 
-        GamesService.getById(req.app.get('db'), req.params.id)
-        .then(game => {
-            if(game.user_id !== req.user.id) {
+        ReviewsService.getById(req.app.get('db'), req.params.id)
+        .then(review => {
+            if(review.user_id !== req.user.id) {
                 return res.status(401).json({ error: 'Unauthorized request'});
             }
         })
-        const numberOfValues = Object.values(gameToUpdate).filter(Boolean).length;
+        const numberOfValues = Object.values(reviewToUpdate).filter(Boolean).length;
         if(numberOfValues === 0) {
             return res.status(400).json({
                 error: {
-                    message: 'Request body must contain title, est_time, importance, loc, and notes'
+                    message: 'Request body must contain title, rating, time_played, review'
                 }
             })
         }
-        GamesService.updateGame(
+        ReviewsService.updateReview(
             req.app.get('db'),
             req.params.id,
-            gameToUpdate
+            reviewToUpdate
         )
             .then(numRowsAffected => {
                 res.status(204).end()
@@ -97,26 +97,26 @@ gamesRouter
             .catch(next)
     })
 
-    async function CheckIfGameExists(req, res, next) {
+    async function CheckIfReviewExists(req, res, next) {
         //async returns the result of the function as a promise.
         //await pauses the execution of the function until the function resolves to a value.
         //so putting these two together, we can share resolved values between multiple steps in the promise chain.  
         try {
-          const game = await GamesService.getById(
+          const review = await ReviewsService.getById(
             req.app.get('db'),
             req.params.id
           )
       
-          if (!game)
+          if (!review)
             
             return res.status(404).json({
-              error: {message: `Game does not exist`}
+              error: {message: `Review does not exist`}
             })
       
-          res.game = game
+          res.review = review
           next()
         } catch (error) {
           next(error)
         }
       }
-module.exports = gamesRouter;
+module.exports = reviewsRouter;

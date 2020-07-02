@@ -1,4 +1,5 @@
 TRUNCATE 
     users,
-    games
+    games,
+    reviews
 RESTART IDENTITY CASCADE;

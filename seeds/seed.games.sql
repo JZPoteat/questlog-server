@@ -18,4 +18,10 @@ VALUES
 ('Mass Effect', 50, 3, 'Origin', 'RPG FPS', 2),
 ('The Witcher 3', 300, 4, 'GOG', 'RPG', 1);
 
+INSERT INTO reviews (title, rating, time_played, review, user_id)
+VALUES
+('Dark Souls', 10, 40, 'Too easy... Maybe a better challenge next time.', 1),
+('Star Wars: Jedi Fallen Order', 3, 30, 'Unrealistic.  He would never escape the dark side.', 2),
+('Call of Duty', 40, 200, 'mehoooyy minoy minoyy mooy', 3);
+
 COMMIT;

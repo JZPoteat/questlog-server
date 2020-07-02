@@ -3,7 +3,7 @@ const app = require('../src/app')
 const helpers = require('./test-helpers')
 const supertest = require('supertest')
 
-describe.only('Users Endpoints', function() {
+describe('Users Endpoints', function() {
   let db
 
   const { testUsers } = helpers.makeGamesFixtures()

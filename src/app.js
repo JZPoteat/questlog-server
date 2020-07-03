@@ -18,10 +18,7 @@ const morganOption = (NODE_ENV === 'production')
 
 app.use(morgan(morganOption));
 app.use(cors());
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    next();
-});
+
 app.use(helmet());
 app.use('/api/games', gamesRouter);
 app.use('/api/users', usersRouter);

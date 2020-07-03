@@ -13,7 +13,6 @@ function requireAuth(req, res, next) {
     }
     try {
         const payload = AuthService.verifyJwt(bearerToken);
-        console.log('payload in jwt auth:  ', payload);
         const [tokenUserName, tokenPassword] = AuthService.parseBasicToken(bearerToken);
         AuthService.getUserWithUserName(
             req.app.get('db'),
@@ -21,7 +20,6 @@ function requireAuth(req, res, next) {
         )
             .then(user => {
                 if (!user ) {
-                    console.log('line 24');
                     return res.status(401).json({ error: 'Unauthorized request' });
                 }
                 req.user = user;
@@ -33,7 +31,6 @@ function requireAuth(req, res, next) {
             });  
 
     } catch(error) {
-        console.log('line 37');
         res.status(401).json({ error: 'Unauthorized request' });
     }
 }

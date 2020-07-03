@@ -43,7 +43,6 @@ gamesRouter
     .all(requireAuth)
     .all(CheckIfGameExists)
     .get((req, res, next) => {
-        console.log('what is this? ', req.user);
         GamesService.getById(req.app.get('db'), req.params.id)
             .then(game => {
                 if(game.user_id !== req.user.id) {

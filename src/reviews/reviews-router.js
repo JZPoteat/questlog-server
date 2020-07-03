@@ -43,7 +43,6 @@ reviewsRouter
     .all(requireAuth)
     .all(CheckIfReviewExists)
     .get((req, res, next) => {
-        console.log('what is this? ', req.user);
         ReviewsService.getById(req.app.get('db'), req.params.id)
             .then(review => {
                 if(review.user_id !== req.user.id) {

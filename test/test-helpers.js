@@ -162,7 +162,6 @@ function seedQLGames(db, users, games) {
 }
 
 function seedQLReviews(db, users, reviews) {
-    console.log(reviews);
     return db.transaction(async trx => {
         await seedUsers(trx, users)
         await trx.into('reviews').insert(reviews)

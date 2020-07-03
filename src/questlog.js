@@ -6,5 +6,3 @@ const knexInstance = knex({
     client: 'pg',
     connection: process.env.DATABASE_URL,
 });
-
-console.log(ArticlesService.getAllGames());

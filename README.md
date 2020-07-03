@@ -1,35 +1,74 @@
-# Express Boilerplate!
+ All paths requires headers: { 
+        "Authorization": "bearer (user auth token)" 
+        }
+ 
+ 
+ path('/games')
+ 
+    GET returns all games by user_name
+    
+    POST request body: { 
+        "title": text, 
+        "priority": integer, 
+        "est_time": integer, 
+        "loc": text, 
+        "notes": text, 
+        "user_id": integer foreign key references user id
+        }
 
-This is a boilerplate project used for starting new projects!
+path('/games/:id')
+    GET returns the game specified by id to the user
 
-## Set up
+    DELETE deletes the game specified by id.  Can only be deleted if the user has access to game.id, which is granted by the unique user auth token.
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+    PATCH updates the game specified by id. Update must contain at least one of the following:  
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
-
-
-
-## commands: 
-
-npm i express morgan cors dotenv helmet uuid winston
-
-npm i mocha chai supertest nodemon -D
+        "title": text, 
+        "priority": integer, 
+        "est_time": integer, 
+        "loc": text, 
+        "notes": text, 
 
 
-## Scripts
+path('/reviews')
+ 
+    GET returns all reviews by user_name
+    
+    POST request body: { 
+        "title": text, 
+        "rating": integer, 
+        "time_played": integer, 
+        "review": text, 
+        "user_id": integer foreign key references user id
+        }
 
-Start the application `npm start`
+path('/reviews/:id')
+    GET returns the reviews specified by id to the user
 
-Start nodemon for the application `npm run dev`
+    DELETE deletes the review specified by id.  Can only be deleted if the user has access to review.id, which is granted by the unique user auth token.
 
-Run the tests `npm test`
+    PATCH updates the game specified by id. Update must contain at least one of the following:  
 
-## Deploying
+        "title": text, 
+        "rating": integer, 
+        "time_played": integer, 
+        "review": text, 
 
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's master branch.
+path('/auth/login')
+    POST validated login credentials sent from the user with the stored user credentials in the database.
+    
+        body{
+            "user_name": text,
+            "password": text  
+        }
+
+path('/users')
+    POST registers a new account in the database.  The user_name must be unique.  Full_name is the user's full name.  The password submitted must be betwen 8 and 72 characters, contain at least one lower case, upper case, number, special character, and cannot contain spaces.
+
+        body{
+
+            "user_name": unique text,
+            "full_name": text,
+            "password": valid text
+
+        }

@@ -64,7 +64,7 @@ function makeTestReviews() {
             rating: 10,
             time_played: 40, 
             review: 'Too easy... Maybe a better challenge next time.',
-            date_created: '2016-06-22 19:10:25-07', 
+            date_created: '2016-06-23T02:10:25.000Z', 
             user_id: 1
         },
         {
@@ -73,7 +73,7 @@ function makeTestReviews() {
             rating: 3,
             time_played: 30,
             review: 'Unrealistic.  He would never escape the dark side.',
-            date_created: '2016-06-22 19:10:25-07', 
+            date_created: '2016-06-23T02:10:25.000Z', 
             user_id: 2
         },
         {
@@ -82,7 +82,7 @@ function makeTestReviews() {
             rating: 40,
             time_played: 200,
             review: 'mehoooyy minoy minoyy mooy',
-            date_created: '2016-06-22 19:10:25-07', 
+            date_created: '2016-06-23T02:10:25.000Z', 
             user_id: 3
         }   
     ];

@@ -122,11 +122,12 @@ describe('Users Endpoints', function() {
       })
     })
     context(`Happy path`, () => {
-           it(`responds 201, serialized user, storing bcryped password`, () => {
+           it(`responds 201, serialized user, storing bcrypted password`, () => {
              const newUser = {
                user_name: 'test user_name',
                password: '11AAaa!!',
                full_name: 'test full_name',
+               date_created: '2016-06-23T02:10:25.000Z'
              }
              return supertest(app)
                .post('/api/users')
@@ -138,9 +139,6 @@ describe('Users Endpoints', function() {
                  expect(res.body.full_name).to.eql(newUser.full_name)
                  expect(res.body).to.not.have.property('password')
                  expect(res.headers.location).to.eql(`/api/users/${res.body.id}`)
-                 const expectedDate = new Date().toLocaleString('en', { timeZone: 'UTC' })
-                 const actualDate = new Date(res.body.date_created).toLocaleString()
-                 expect(actualDate).to.eql(expectedDate)
                })
                 .expect(res =>
                    db

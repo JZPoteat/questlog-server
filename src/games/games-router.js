@@ -106,12 +106,10 @@ gamesRouter
             req.params.id
           )
       
-          if (!game)
-            
+          if (!game) 
             return res.status(404).json({
               error: {message: `Game does not exist`}
             })
-      
           res.game = game
           next()
         } catch (error) {

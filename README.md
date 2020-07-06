@@ -1,3 +1,5 @@
+ API Endpoint: 'https://evening-brushlands-02534.herokuapp.com/api'
+ 
  All paths requires headers: { 
         "Authorization": "bearer (user auth token)" 
         }

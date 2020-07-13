@@ -1,6 +1,7 @@
 const xss = require('xss');
 const GamesService = {
     getAllGames(knex, user) {
+        //returns games from db with corresponding user id
         return knex.from('games')
             .select('games.*', 'users.user_name')
             .join('users', 'games.user_id', '=', 'users.id')

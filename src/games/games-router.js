@@ -9,16 +9,19 @@ const jsonParser = express.json();
 
 gamesRouter
     .route('/')
+    //all paths in /games require auth
     .all(requireAuth)
     .get((req, res, next) => {
         const currentUser = req.user.user_name
         GamesService.getAllGames(req.app.get('db'), currentUser)
+        //returns all games that corresponds to user_id
             .then(games => {
                 res.json(GamesService.serializeGames(games));
             })
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
+        //need the jsonParser to parse the json body
         const { title, est_time, importance, loc, notes } = req.body;
         const user_id = req.user.id;
         const newGame = { title, est_time, importance, loc, notes, user_id };
@@ -40,7 +43,9 @@ gamesRouter
 
 gamesRouter
     .route('/:id')
+    //require authorization for /games/:id
     .all(requireAuth)
+    //check if game exists before performing operation
     .all(CheckIfGameExists)
     .get((req, res, next) => {
         GamesService.getById(req.app.get('db'), req.params.id)
@@ -78,6 +83,7 @@ gamesRouter
             }
         })
         const numberOfValues = Object.values(gameToUpdate).filter(Boolean).length;
+        //if no new values, return 400 error.
         if(numberOfValues === 0) {
             return res.status(400).json({
                 error: {

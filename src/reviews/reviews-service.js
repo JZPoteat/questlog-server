@@ -1,6 +1,7 @@
 const xss = require('xss');
 const ReviewsService = {
     getAllReviews(knex, user) {
+        //returns reviews from db with corresponding user id
         return knex.from('reviews')
             .select('reviews.*', 'users.user_name')
             .join('users', 'reviews.user_id', '=', 'users.id')

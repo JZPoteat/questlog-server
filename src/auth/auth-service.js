@@ -4,11 +4,10 @@ const config = require('../config');
 
 const AuthService = {
     getUserWithUserName(db, user_name) {
-        return db('users')
-            .where({ user_name })
-            .first();
+        return db('users').where({ user_name }).first();
     },
     comparePasswords(password, hash) {
+    //compares user input password with hashed password stored in database. Returns true or false
         return bcrypt.compare(password, hash);
     },
     createJwt(subject, payload) {
@@ -24,10 +23,7 @@ const AuthService = {
         });
     },
     parseBasicToken(token) {
-        return Buffer
-            .from(token, 'base64')
-            .toString()
-            .split(':');
+        return Buffer.from(token, 'base64').toString().split(':');
     },
 };
 

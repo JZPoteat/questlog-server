@@ -9,16 +9,19 @@ const jsonParser = express.json();
 
 reviewsRouter
     .route('/')
+    //all paths require auth
     .all(requireAuth)
     .get((req, res, next) => {
         const currentUser = req.user.user_name
         ReviewsService.getAllReviews(req.app.get('db'), currentUser)
+            //returns all reviews that corresponds with userid
             .then(reviews => {
                 res.json(ReviewsService.serializeReviews(reviews));
             })
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
+        //need jsonParser to parse the body
         const { title, rating, time_played, review } = req.body;
         const user_id = req.user.id;
         const newReview = { title, rating, time_played, review, user_id };
@@ -40,7 +43,9 @@ reviewsRouter
 
 reviewsRouter
     .route('/:id')
+    //require authorization for all paths
     .all(requireAuth)
+    //check if review exists before performing path
     .all(CheckIfReviewExists)
     .get((req, res, next) => {
         ReviewsService.getById(req.app.get('db'), req.params.id)

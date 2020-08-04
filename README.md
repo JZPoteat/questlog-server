@@ -1,6 +1,7 @@
  # QuestLog
 
  ### live app: https://questlog.vercel.app
+ ### link to client repo:  https://github.com/JZPoteat/questlog-client
  
  ## Hello Adventurer!
 
